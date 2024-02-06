@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { PostsService } from './posts.service';
 interface PostModel {
   id: number;
@@ -43,5 +43,11 @@ export class PostsController {
   @Get()
   getPosts() {
     return posts;
+  }
+
+  // 2) GET /posts/:id
+  @Get(':id')
+  getPost(@Param('id') id: string) {
+    return posts.find((post) => post.id === +id);
   }
 }
