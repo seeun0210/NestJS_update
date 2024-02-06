@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { PostsService } from './posts.service';
+import { NotFoundError } from 'rxjs';
 interface PostModel {
   id: number;
   author: string;
@@ -46,8 +47,15 @@ export class PostsController {
   }
 
   // 2) GET /posts/:id
+  // id에 해당되는 post를 가져온다
   @Get(':id')
   getPost(@Param('id') id: string) {
-    return posts.find((post) => post.id === +id);
+    const post = posts.find((post) => post.id === +id);
+    if (!post) {
+      throw new NotFoundException();
+    }
+    return post;
   }
+  // 3)POST /posts
+  // post를 생성한다
 }
