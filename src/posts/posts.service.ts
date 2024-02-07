@@ -47,15 +47,14 @@ export class PostsService {
     private readonly postsRepository: Repository<PostsModel>,
   ) {}
   async getAllPosts() {
-    return this.postsRepository.find();
+    return await this.postsRepository.find();
   }
 
-  getPostById(id: number) {
-    const post = posts.find((post) => post.id === +id);
+  async getPostById(id: number) {
+    const post = this.postsRepository.findOne({ where: { id } });
     if (!post) {
       throw new NotFoundException();
     }
-    return post;
   }
 
   createPost(author: string, title: string, content: string) {
