@@ -1,4 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { PostsModel } from './entities/posts.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 export interface PostModel {
   id: number;
@@ -39,6 +42,10 @@ export let posts: PostModel[] = [
 //1. 프로바이더로 생성하고 싶은 클래스는 모듈에다 등록해주기
 //2. @Injectable() 어노테이션 해주기
 export class PostsService {
+  constructor(
+    @InjectRepository(PostsModel)
+    private readonly postsRepository: Repository<PostsModel>,
+  ) {}
   getAllPosts() {
     return posts;
   }

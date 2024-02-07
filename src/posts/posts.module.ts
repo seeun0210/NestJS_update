@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PostsModel } from './entities/posts.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([PostsModel])],
   //인스턴스화 해서 관래할 클래스만 그대로 클래스로 입력
   controllers: [PostsController],
   //컨트롤러에서 주입을 하는 값들을 전부 다 providers안에다 넣어줌
