@@ -35,6 +35,9 @@ export let posts: PostModel[] = [
   },
 ];
 @Injectable()
+//주입 할 수 있다.
+//1. 프로바이더로 생성하고 싶은 클래스는 모듈에다 등록해주기
+//2. @Injectable() 어노테이션 해주기
 export class PostsService {
   getAllPosts() {
     return posts;
