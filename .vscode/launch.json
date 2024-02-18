@@ -1,0 +1,19 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node", //세팅의 타입
+      "request": "launch", //launch 실행하는지, attach실행되있는거에 붙는거
+      "name": "Debug NestJS", //어떤 이름으로 부를건지
+      "runtimeExecutable": "npm", //어떤걸로 실행할건지,
+      "runtimeArgs": ["run", "start:debug"],
+      "console": "integratedTerminal",
+      "restart": true, //자동연결 할건지
+      "port": 9229,
+      "autoAttachChildProcesses": true //디버거를 자동으로 process에 붙을지 말지 결정
+    }
+  ]
+}
