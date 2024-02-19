@@ -4,7 +4,6 @@ import { UsersModel } from 'src/users/entities/users.entity';
 import { HASH_ROUNDS, JWT_SECRET } from './const/auth.const';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { decode } from 'punycode';
 
 @Injectable()
 export class AuthService {
@@ -69,6 +68,35 @@ export class AuthService {
     const email = split[0];
     const password = split[1];
     return { email, password };
+  }
+  /**
+   * 토큰 검증
+   */
+  verifyToken(token: string) {
+    return this.jwtService.verify(token, {
+      secret: JWT_SECRET,
+    });
+  }
+
+  /**
+   * 토큰 재발급(refresh토큰을 이용해서 accessToken 재발급)
+   */
+  rotateToken(token: string, isRefreshToken: boolean) {
+    const decoded = this.jwtService.verify(token, {
+      secret: JWT_SECRET,
+    });
+    /**
+     * sub: id
+     * email: email
+     * type: 'access' | 'refresh'
+     * 토큰 재발급은 refresh token으로만 가능
+     */
+    if (decoded.type != 'refresh') {
+      throw new UnauthorizedException(
+        '토큰 재발급은 refreshToken으로만 가능합니다!',
+      );
+    }
+    return this.signToken({ ...decoded }, isRefreshToken);
   }
   /*
    *우리가 만드려는 기능
