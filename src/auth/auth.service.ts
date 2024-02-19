@@ -4,6 +4,7 @@ import { UsersModel } from 'src/users/entities/users.entity';
 import { HASH_ROUNDS, JWT_SECRET } from './const/auth.const';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { decode } from 'punycode';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +41,7 @@ export class AuthService {
    * {authorization: 'Basic {token}'}
    * {authorization: 'Bearer {token}'}
    */
-  async extractTokenFromHeader(header: string, isBearer: boolean) {
+  extractTokenFromHeader(header: string, isBearer: boolean) {
     //'Basic {token}'
     //[Basic,{token}]
     const splitToken = header.split(' ');
@@ -50,6 +51,24 @@ export class AuthService {
     }
     const token = splitToken[1];
     return token;
+  }
+  /**
+   * Basic asdfasdfasdf:asdfasdfasd
+   *
+   * 1) asdfasdfasdf:asdfasdfasd -> email:password
+   * 2) email:password->[email,password]
+   * 3) {email: email, password: password}
+   */
+  decodeBasicToken(base64string: string) {
+    const decoded = Buffer.from(base64string, 'base64').toString('utf8');
+
+    const split = decoded.split(':');
+    if (split.length !== 2) {
+      throw new UnauthorizedException('잘못된 유형의 토큰입니다');
+    }
+    const email = split[0];
+    const password = split[1];
+    return { email, password };
   }
   /*
    *우리가 만드려는 기능
