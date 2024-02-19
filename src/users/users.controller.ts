@@ -11,7 +11,7 @@ export class UsersController {
     @Body('password') password: string,
     @Body('email') email: string,
   ) {
-    return this.usersService.createUser(nickname, email, password);
+    return this.usersService.createUser({ nickname, email, password });
   }
 
   @Get()
