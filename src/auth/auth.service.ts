@@ -34,6 +34,23 @@ export class AuthService {
    * 6) 토큰이 만료되면 각각의 토큰을 새로발급받을 수 있는 엔드포인트에 요청을 해서
    *    새로운 토큰을 발급받고 새로운 토큰을 사용해서 private route에 접근한다.
    */
+  /**
+   * Header로 부터 토큰을 받을 때
+   *
+   * {authorization: 'Basic {token}'}
+   * {authorization: 'Bearer {token}'}
+   */
+  async extractTokenFromHeader(header: string, isBearer: boolean) {
+    //'Basic {token}'
+    //[Basic,{token}]
+    const splitToken = header.split(' ');
+    const prefix = isBearer ? 'Bearer' : 'Basic';
+    if (splitToken.length !== 2 || splitToken[0] !== prefix) {
+      throw new UnauthorizedException('잘못된 토큰입니다!');
+    }
+    const token = splitToken[1];
+    return token;
+  }
   /*
    *우리가 만드려는 기능
    *
