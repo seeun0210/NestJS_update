@@ -19,3 +19,36 @@ export class PasswordPipe implements PipeTransform {
     return value.toString();
   }
 }
+
+//파이프를 훨씬 더 세분화해서 파이프를 나눠서 조합해서 쓸 수 있다
+@Injectable()
+export class MaxLengthPipe implements PipeTransform {
+  constructor(
+    private readonly length: number,
+    private readonly subject: string,
+  ) {}
+  transform(value: any, metadata: ArgumentMetadata) {
+    if (value.toString().length > this.length) {
+      throw new BadRequestException(
+        `${this.subject}의 최대 길이는 ${this.length}입니다`,
+      );
+    }
+    return value.toString();
+  }
+}
+
+@Injectable()
+export class MinLengthPipe implements PipeTransform {
+  constructor(
+    private readonly length: number,
+    private readonly subject: string,
+  ) {}
+  transform(value: any, metadata: ArgumentMetadata) {
+    if (value.toString().length < this.length) {
+      throw new BadRequestException(
+        `${this.subject}의 최소 길이는 ${this.length}입니다`,
+      );
+    }
+    return value.toString();
+  }
+}

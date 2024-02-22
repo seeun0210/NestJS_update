@@ -1,6 +1,10 @@
 import { Body, Controller, Headers, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { PasswordPipe } from './pipe/password.pipe';
+import {
+  MaxLengthPipe,
+  MinLengthPipe,
+  PasswordPipe,
+} from './pipe/password.pipe';
 
 @Controller('auth')
 export class AuthController {
@@ -48,7 +52,12 @@ export class AuthController {
     @Body('nickname') nickname: string,
     @Body('email') email: string,
     //파이프에서 통과되지 않으면 아래의 로직은 실행되지 않음
-    @Body('password', PasswordPipe) password: string,
+    @Body(
+      'password',
+      new MaxLengthPipe(8, '비밀번호'),
+      new MinLengthPipe(3, '비밀번호'),
+    )
+    password: string,
   ) {
     return this.authService.registerWithEmail({
       nickname,
