@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -46,6 +47,13 @@ export class PostsController {
     @Body('authorId') authorId: number,
     @Body('title') title: string,
     @Body('content') content: string,
+    //DefaultValuePipe의 경우 new로 인스턴스화를 해줌
+    //new를 사용해서 인스턴스화를 하면 함수가 실행할때마다 계속 생김
+    //ParseIntPipe는 클래스를 그냥 그대로 입력해줌
+    //이건 NestJs의 IOC컨테이너에서 Inversion of Control컨테이너에서 자동으로 이 값을 주입해주는 것
+    //결론적으로 작동하는데는 큰 차이가 없음
+    //nestJs에서 dependency injection을 해주냐 안해주냐의 차이!
+    @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
     return this.postsService.createPost(authorId, title, content);
   }
