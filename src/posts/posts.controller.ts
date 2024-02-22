@@ -51,7 +51,8 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   postPosts(
     //User 커스텀데코레이터로 user정보가져오기
-    @User() user: UsersModel,
+    //파라미터로 UsersModel의 키값을 가져올 수 있게 해놓음
+    @User('id') userId: number,
     @Body('title') title: string,
     @Body('content') content: string,
     //DefaultValuePipe의 경우 new로 인스턴스화를 해줌
@@ -62,8 +63,8 @@ export class PostsController {
     //nestJs에서 dependency injection을 해주냐 안해주냐의 차이!
     @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
-    const authorId = user.id;
-    return this.postsService.createPost(authorId, title, content);
+    // const authorId = user.id;
+    return this.postsService.createPost(userId, title, content);
   }
   // 4)PUT /posts/:id
   // id에 해당하는 POST를 변경한다.
