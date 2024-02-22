@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { RolesEnum } from '../const/roles.const';
 import { PostsModel } from 'src/posts/entities/posts.entity';
+import { BaseModel } from 'src/common/entity/base.entity';
 /**
  * id: number
  *
@@ -22,9 +23,9 @@ import { PostsModel } from 'src/posts/entities/posts.entity';
  *
  */
 @Entity()
-export class UsersModel {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class UsersModel extends BaseModel {
+  // @PrimaryGeneratedColumn()
+  // id: number;
 
   @Column({
     //1) 길이
@@ -54,9 +55,9 @@ export class UsersModel {
   @OneToMany(() => PostsModel, (post) => post.author)
   posts: PostsModel[];
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  // @UpdateDateColumn()
+  // updatedAt: Date;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  // @CreateDateColumn()
+  // createdAt: Date;
 }
