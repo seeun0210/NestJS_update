@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
+import { User } from 'src/users/decorator/user.decorator';
+import { UsersModel } from 'src/users/entities/users.entity';
 
 @Controller('posts')
 export class PostsController {
@@ -48,7 +50,8 @@ export class PostsController {
   @Post()
   @UseGuards(AccessTokenGuard)
   postPosts(
-    @Request() req: any,
+    //User 커스텀데코레이터로 user정보가져오기
+    @User() user: UsersModel,
     @Body('title') title: string,
     @Body('content') content: string,
     //DefaultValuePipe의 경우 new로 인스턴스화를 해줌
@@ -59,7 +62,7 @@ export class PostsController {
     //nestJs에서 dependency injection을 해주냐 안해주냐의 차이!
     @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
-    const authorId = req.user.id;
+    const authorId = user.id;
     return this.postsService.createPost(authorId, title, content);
   }
   // 4)PUT /posts/:id
