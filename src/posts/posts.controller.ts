@@ -8,8 +8,11 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
+import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -43,8 +46,9 @@ export class PostsController {
   // 3)POST /posts
   // post를 생성한다
   @Post()
+  @UseGuards(AccessTokenGuard)
   postPosts(
-    @Body('authorId') authorId: number,
+    @Request() req: any,
     @Body('title') title: string,
     @Body('content') content: string,
     //DefaultValuePipe의 경우 new로 인스턴스화를 해줌
@@ -55,6 +59,7 @@ export class PostsController {
     //nestJs에서 dependency injection을 해주냐 안해주냐의 차이!
     @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
+    const authorId = req.user.id;
     return this.postsService.createPost(authorId, title, content);
   }
   // 4)PUT /posts/:id
