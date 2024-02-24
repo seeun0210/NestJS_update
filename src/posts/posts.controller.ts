@@ -15,6 +15,7 @@ import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 import { User } from 'src/users/decorator/user.decorator';
 import { UsersModel } from 'src/users/entities/users.entity';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -47,14 +48,17 @@ export class PostsController {
   }
   // 3)POST /posts
   // post를 생성한다
+  //
+  //DTO-Data Transfer Object(데이터 전송 객체)
   @Post()
   @UseGuards(AccessTokenGuard)
   postPosts(
     //User 커스텀데코레이터로 user정보가져오기
     //파라미터로 UsersModel의 키값을 가져올 수 있게 해놓음
     @User('id') userId: number,
-    @Body('title') title: string,
-    @Body('content') content: string,
+    @Body() body: CreatePostDto,
+    // @Body('title') title: string,
+    // @Body('content') content: string,
     //DefaultValuePipe의 경우 new로 인스턴스화를 해줌
     //new를 사용해서 인스턴스화를 하면 함수가 실행할때마다 계속 생김
     //ParseIntPipe는 클래스를 그냥 그대로 입력해줌
@@ -64,7 +68,7 @@ export class PostsController {
     @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
     // const authorId = user.id;
-    return this.postsService.createPost(userId, title, content);
+    return this.postsService.createPost(userId, body);
   }
   // 4)PUT /posts/:id
   // id에 해당하는 POST를 변경한다.
