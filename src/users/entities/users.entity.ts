@@ -33,6 +33,9 @@ import { Exclude, Expose } from 'class-transformer';
  *
  */
 @Entity()
+//클래스 전체를 노출시키지 않을 수도 있음
+//그리고 보여주고 싶은 프로퍼티만 Expose()어노테이션을 붙여서 노출 시킬 수 있다
+// @Exclude()
 export class UsersModel extends BaseModel {
   // @PrimaryGeneratedColumn()
   // id: number;
@@ -49,20 +52,22 @@ export class UsersModel extends BaseModel {
   })
   //1) 길이가 20을 넘지 않을 것
   //2) 유일무이한 값이 될 것
+  // @Expose()
   nickname: string;
 
   //이걸 노출하고 싶다면??
   //이렇게 실제 존재하지 않는 프로퍼티를 노출시킬 수 있다.
-  @Expose()
-  get nicknameAndEmail() {
-    return this.nickname + '/' + this.email;
-  }
+  // @Expose()
+  // get nicknameAndEmail() {
+  //   return this.nickname + '/' + this.email;
+  // }
 
   @Column({
     unique: true,
   })
   @IsEmail({}, { message: emailValidationMessage })
   //1) 유일무이한 값이 될 것
+  // @Expose()
   email: string;
 
   @Column()
