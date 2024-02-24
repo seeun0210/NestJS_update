@@ -44,7 +44,9 @@ export class PostsModel extends BaseModel {
   })
   //"/public/posts/b5ac8835-10f2-49f0-857f-1ccc7650d344.JPG",
   //이런 형태로 이미지를 보내주면 프론트에서 앞에 도메인만 붙여서 이미지를 보여줄 수 있다.
-  @Transform(({ value }) => `/${join(POST_PUBLIC_IMAGE_PATH, value)}`)
+  @Transform(({ value }) =>
+    value ? `/${join(POST_PUBLIC_IMAGE_PATH, value)}` : null,
+  )
   image?: string;
 
   @Column()
