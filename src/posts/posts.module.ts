@@ -12,7 +12,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { AuthModule } from 'src/auth/auth.module';
 import { extname } from 'path';
 import * as multer from 'multer';
-import { POST_IMAGE_PATH } from 'src/users/const/path.const';
+import { POST_IMAGE_PATH } from 'src/common/const/path.const';
 import { v4 as uuid } from 'uuid';
 
 @Module({

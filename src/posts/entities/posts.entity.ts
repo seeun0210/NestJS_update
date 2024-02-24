@@ -1,4 +1,7 @@
+import { Transform } from 'class-transformer';
 import { IsString } from 'class-validator';
+import { join } from 'path';
+import { POST_PUBLIC_IMAGE_PATH } from 'src/common/const/path.const';
 import { BaseModel } from 'src/common/entity/base.entity';
 import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { UsersModel } from 'src/users/entities/users.entity';
@@ -39,6 +42,9 @@ export class PostsModel extends BaseModel {
   @Column({
     nullable: true,
   })
+  //"/public/posts/b5ac8835-10f2-49f0-857f-1ccc7650d344.JPG",
+  //이런 형태로 이미지를 보내주면 프론트에서 앞에 도메인만 붙여서 이미지를 보여줄 수 있다.
+  @Transform(({ value }) => `/${join(POST_PUBLIC_IMAGE_PATH, value)}`)
   image?: string;
 
   @Column()
