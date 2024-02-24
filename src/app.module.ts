@@ -18,6 +18,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
 import { LogMiddleWare } from './common/middleware/log.middleware';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   //다른 모듈을 불러올 때 사용하는 imports
@@ -46,6 +47,7 @@ import { LogMiddleWare } from './common/middleware/log.middleware';
     UsersModule,
     AuthModule,
     CommonModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [
