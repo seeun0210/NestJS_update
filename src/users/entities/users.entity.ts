@@ -61,7 +61,25 @@ export class UsersModel extends BaseModel {
   @Column()
   @IsString({ message: stringValidationMessage })
   @Length(3, 8, { message: lengthValidationMessage })
-  @Exclude()
+  /**
+   * Request
+   * frontend->backend
+   * plain object(JSON)->class instance (dto)
+   *
+   * Response
+   * backend->fronted
+   * class instance(dto)->plain object(JSON)
+   *
+   * toClassOnly->class instance 변환될때만
+   * toPlainOnly->plain object 변환될때만
+   */
+  /**
+   * 우리는 응답에서만 제외시켜야 함
+   */
+  //toPlainOnly:true-> 응답이 나갈때만 제외를 시킴
+  @Exclude({
+    toPlainOnly: true,
+  })
   //class-transformer로 부터 불러옴
   //비밀번호를 불러오기를 원하지 않는 곳에서 interceptor로 비밀번호를 제거할 수 있음
   password: string;
