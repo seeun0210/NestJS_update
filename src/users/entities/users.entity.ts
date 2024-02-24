@@ -9,6 +9,7 @@ import {
 import { RolesEnum } from '../const/roles.const';
 import { PostsModel } from 'src/posts/entities/posts.entity';
 import { BaseModel } from 'src/common/entity/base.entity';
+import { IsEmail, IsString, Length } from 'class-validator';
 /**
  * id: number
  *
@@ -33,6 +34,8 @@ export class UsersModel extends BaseModel {
     //2) 유일무이한 값
     unique: true,
   })
+  @IsString()
+  @Length(1, 20, { message: '닉네임은 1~20자 사이로 입력해주세요.' })
   //1) 길이가 20을 넘지 않을 것
   //2) 유일무이한 값이 될 것
   nickname: string;
@@ -40,10 +43,13 @@ export class UsersModel extends BaseModel {
   @Column({
     unique: true,
   })
+  @IsEmail()
   //1) 유일무이한 값이 될 것
   email: string;
 
   @Column()
+  @IsString()
+  @Length(3, 8, { message: '비밀전호는 3~8자 사이로 입력해주세요' })
   password: string;
 
   @Column({
