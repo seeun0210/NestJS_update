@@ -27,6 +27,9 @@ export class ChatsMessagesService {
       where: {
         id: message.id,
       },
+      relations: {
+        chat: true,
+      },
     });
   }
 }

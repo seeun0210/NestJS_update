@@ -95,6 +95,8 @@ export class ChatsGateway implements OnGatewayConnection {
     const message = await this.messagesService.createMessage(dto);
 
     //나를 제외한 사람들에게 메시지 보내기
-    socket.to(message.id.toString()).emit('receive_message', message.message);
+    socket
+      .to(message.chat.id.toString())
+      .emit('receive_message', message.message);
   }
 }
