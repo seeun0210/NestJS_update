@@ -36,6 +36,11 @@ export class PostsModel extends BaseModel {
   @Column()
   likeCount: number;
 
+  @Column({
+    nullable: true,
+  })
+  image?: string;
+
   @Column()
   commentCount: number;
 
