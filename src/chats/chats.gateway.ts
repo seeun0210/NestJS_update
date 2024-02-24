@@ -5,10 +5,12 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { ChatsService } from './chats.service';
+import { EnterChatDto } from './dto/enter-chat.dto';
 
 //socket.io가 연결하게되는 부분을 Gateway라고 부름
 @WebSocketGateway({
@@ -37,16 +39,31 @@ export class ChatsGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('enter_chat')
-  enterChat(
+  async enterChat(
     //방의 ID들을 리스트로 받는다.
     //하나의 방이 아니라 여러개의 방에 join하고 싶을 수 있으니..!
-    @MessageBody() data: number[],
+    @MessageBody() data: EnterChatDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    for (const chatId of data) {
-      //socket.join()
-      socket.join(chatId.toString());
+    // for (const chatId of data) {
+    //socket.join()
+    //   socket.join(chatId.toString());
+    // }
+
+    //굳이 존재하지 않는 방에 들어가느건 리소스 낭비
+    for (const chatId of data.chatIds) {
+      const exists = await this.chatsService.checkIfChatExists(chatId);
+
+      if (!exists) {
+        throw new WsException({
+          message: `존재하지 않는 chat 입니다. chatId: ${chatId}`,
+        });
+      }
     }
+
+    //for loops를 돌지 않고
+    //이렇게 해도 방에 들어갈 수 있음
+    socket.join(data.chatIds.map((x) => x.toString()));
   }
 
   //socket.on('send_message',(message)=>{console.log(message)})
