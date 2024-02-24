@@ -22,6 +22,8 @@ import {
 import { SocketCatchHttpExceptionFilter } from 'src/common/exception-filter/socket-catch-http.exception-filter';
 import { SocketBearerTokenGuard } from 'src/auth/guard/socket/socket-bearer-token.guard';
 import { UsersModel } from 'src/users/entities/users.entity';
+import { UsersService } from 'src/users/users.service';
+import { AuthService } from 'src/auth/auth.service';
 
 //socket.io가 연결하게되는 부분을 Gateway라고 부름
 @WebSocketGateway({
@@ -32,6 +34,8 @@ export class ChatsGateway implements OnGatewayConnection {
   constructor(
     private readonly chatsService: ChatsService,
     private readonly messagesService: ChatsMessagesService,
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
   ) {}
 
   //웹소켓 서버로 annotate를 해주기만 하면 server변수에 NestJs 프레임워크가 서버객체를 넣어줌
@@ -39,8 +43,37 @@ export class ChatsGateway implements OnGatewayConnection {
   server: Server;
 
   //연결 되면 실행
-  handleConnection(socket: Socket) {
+  //소켓과 연결해서 사용자 정보를 지속시킬거임
+  //소켓에 사용자 정보가 연결이되면 후에 소켓 정보가 다른 이벤트를 보낼 때 전부 다 지속이 됨!!
+  async handleConnection(socket: Socket & { user: UsersModel }) {
     console.log(`on connect called: ${socket.id}`);
+    const headers = socket.handshake.headers;
+
+    //Bearer xxxxxx
+    const rawToken = headers['authorization'];
+
+    if (!rawToken) {
+      //   throw new WsException('토큰이 없습니다!');
+      //토큰이 없으면 disconnect
+      socket.disconnect();
+    }
+
+    try {
+      const token = this.authService.extractTokenFromHeader(rawToken, true);
+
+      const payload = this.authService.verifyToken(token);
+
+      const user = await this.usersService.getUserByEmail(payload.email);
+
+      //소켓에 유저 정보 넣어주기
+      socket.user = user;
+
+      return true;
+    } catch (e) {
+      //   throw new WsException('유효하지 않은 토큰입니다.');
+      //검증이 안되면 에러를 던지는 대신 연결을 끊는다
+      socket.disconnect();
+    }
   }
 
   //채팅room 만들기
@@ -58,7 +91,7 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
-  @UseGuards(SocketBearerTokenGuard)
+  //   @UseGuards(SocketBearerTokenGuard)
   @SubscribeMessage('create_chat')
   async createChat(
     @MessageBody() data: CreateChatDto,
@@ -78,13 +111,13 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
-  @UseGuards(SocketBearerTokenGuard)
+  //   @UseGuards(SocketBearerTokenGuard)
   @SubscribeMessage('enter_chat')
   async enterChat(
     //방의 ID들을 리스트로 받는다.
     //하나의 방이 아니라 여러개의 방에 join하고 싶을 수 있으니..!
     @MessageBody() data: EnterChatDto,
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
     // for (const chatId of data) {
     //socket.join()
@@ -118,7 +151,10 @@ export class ChatsGateway implements OnGatewayConnection {
     }),
   )
   @UseFilters(SocketCatchHttpExceptionFilter)
-  @UseGuards(SocketBearerTokenGuard)
+  //메시지를 보낼 때 마다 검증을 할 필요 없음
+  //사용자를 소켓과 연결시킬때만!!
+  //그럼 어떻게 사용자 정보를 가져오지??
+  //   @UseGuards(SocketBearerTokenGuard)
   //socket.on('send_message',(message)=>{console.log(message)})
   @SubscribeMessage('send_message')
   async sendMessage(
