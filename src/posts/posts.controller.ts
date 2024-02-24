@@ -11,6 +11,7 @@ import {
   Post,
   Put,
   Request,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { User } from 'src/users/decorator/user.decorator';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 export class PostsController {
@@ -58,11 +60,14 @@ export class PostsController {
   //DTO-Data Transfer Object(데이터 전송 객체)
   @Post()
   @UseGuards(AccessTokenGuard)
+  //포스트맨 또는 클라이언트에서 실제로 이미지를 업로드할 때, 이미지라는 키값에 파일을 넣어서 보내면 된다
+  @UseInterceptors(FileInterceptor('image'))
   postPosts(
     //User 커스텀데코레이터로 user정보가져오기
     //파라미터로 UsersModel의 키값을 가져올 수 있게 해놓음
     @User('id') userId: number,
     @Body() body: CreatePostDto,
+    @UploadedFile() file?: Express.Multer.File,
     // @Body('title') title: string,
     // @Body('content') content: string,
     //DefaultValuePipe의 경우 new로 인스턴스화를 해줌
@@ -71,10 +76,10 @@ export class PostsController {
     //이건 NestJs의 IOC컨테이너에서 Inversion of Control컨테이너에서 자동으로 이 값을 주입해주는 것
     //결론적으로 작동하는데는 큰 차이가 없음
     //nestJs에서 dependency injection을 해주냐 안해주냐의 차이!
-    @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
+    // @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
     // const authorId = user.id;
-    return this.postsService.createPost(userId, body);
+    return this.postsService.createPost(userId, body, file?.filename);
   }
   // 4)PUT /posts/:id
   // id에 해당하는 POST를 변경한다.

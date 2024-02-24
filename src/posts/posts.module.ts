@@ -36,7 +36,7 @@ import { v4 as uuid } from 'uuid';
          */
         //xxx.jpg->.jpg
         const ext = extname(file.originalname);
-        if (ext !== '.jpg' && ext !== 'jpeg' && ext !== '.png') {
+        if (ext !== '.JPG' && ext !== 'jpeg' && ext !== '.png') {
           return cb(
             new BadRequestException('jpg/jpeg/png파일만 업로드 가능합니다!'),
             false,
