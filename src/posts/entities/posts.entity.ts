@@ -1,5 +1,6 @@
 import { IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entity/base.entity';
+import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { UsersModel } from 'src/users/entities/users.entity';
 import {
   Column,
@@ -22,13 +23,13 @@ export class PostsModel extends BaseModel {
 
   @Column()
   @IsString({
-    message: 'title은 string타입을 입력해주어야 합니다.',
+    message: stringValidationMessage,
   })
   title: string;
 
   @Column()
   @IsString({
-    message: 'content는 string타입을 입력해주어야 합니다.',
+    message: stringValidationMessage,
   })
   content: string;
 
