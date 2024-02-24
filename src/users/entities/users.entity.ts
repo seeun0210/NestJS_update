@@ -18,6 +18,7 @@ import {
 import { lengthValidationMessage } from 'src/common/validation-message/length-validation.message';
 import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.message';
+import { Exclude } from 'class-transformer';
 /**
  * id: number
  *
@@ -60,6 +61,9 @@ export class UsersModel extends BaseModel {
   @Column()
   @IsString({ message: stringValidationMessage })
   @Length(3, 8, { message: lengthValidationMessage })
+  @Exclude()
+  //class-transformer로 부터 불러옴
+  //비밀번호를 불러오기를 원하지 않는 곳에서 interceptor로 비밀번호를 제거할 수 있음
   password: string;
 
   @Column({
