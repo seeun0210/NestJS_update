@@ -7,6 +7,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { ChatsService } from './chats.service';
 
 //socket.io가 연결하게되는 부분을 Gateway라고 부름
 @WebSocketGateway({
@@ -14,6 +16,8 @@ import { Server, Socket } from 'socket.io';
   namespace: 'chats',
 })
 export class ChatsGateway implements OnGatewayConnection {
+  constructor(private readonly chatsService: ChatsService) {}
+
   //웹소켓 서버로 annotate를 해주기만 하면 server변수에 NestJs 프레임워크가 서버객체를 넣어줌
   @WebSocketServer()
   server: Server;
@@ -21,6 +25,15 @@ export class ChatsGateway implements OnGatewayConnection {
   //연결 되면 실행
   handleConnection(socket: Socket) {
     console.log(`on connect called: ${socket.id}`);
+  }
+
+  //채팅room 만들기
+  @SubscribeMessage('create_chat')
+  async createChat(
+    @MessageBody() data: CreateChatDto,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const chat = await this.chatsService.createChat(data);
   }
 
   @SubscribeMessage('enter_chat')

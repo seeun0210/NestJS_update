@@ -19,6 +19,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
 import { LogMiddleWare } from './common/middleware/log.middleware';
 import { ChatsModule } from './chats/chats.module';
+import { ChatsModel } from './chats/entity/chats.entity';
 
 @Module({
   //다른 모듈을 불러올 때 사용하는 imports
@@ -39,7 +40,7 @@ import { ChatsModule } from './chats/chats.module';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [PostsModel, UsersModel],
+      entities: [PostsModel, UsersModel, ChatsModel],
       //개발환경에서는 true
       //production한경에서는 false
       synchronize: true,
