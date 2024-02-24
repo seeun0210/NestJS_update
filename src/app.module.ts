@@ -1,4 +1,10 @@
-import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
@@ -11,6 +17,7 @@ import { CommonModule } from './common/common.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
+import { LogMiddleWare } from './common/middleware/log.middleware';
 
 @Module({
   //다른 모듈을 불러올 때 사용하는 imports
@@ -47,4 +54,10 @@ import { PUBLIC_FOLDER_PATH } from './common/const/path.const';
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LogMiddleWare)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
