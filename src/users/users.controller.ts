@@ -22,7 +22,7 @@ export class UsersController {
   // }
 
   @Get()
-  @UseInterceptors(ClassSerializerInterceptor)
+  // @UseInterceptors(ClassSerializerInterceptor)
   //인터셉터를 사용해서 @Exclude()어노테이션을 붙인 값을 제거할 수 있다
   /**
    * serialization-> 직렬화-> 현재 시스템에서 사용되는 (NESTJS) 데이터의 구조를 다른 시스템에도 쉽게 사용할 수 있는 포맷으로 변환

@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   DefaultValuePipe,
   Delete,
@@ -11,6 +12,7 @@ import {
   Put,
   Request,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
@@ -26,6 +28,7 @@ export class PostsController {
   // 1) GET /posts
   // 모든 post를 다 가져온다
   @Get()
+  // @UseInterceptors(ClassSerializerInterceptor)
   getPosts() {
     return this.postsService.getAllPosts();
   }
@@ -43,6 +46,7 @@ export class PostsController {
   // }
   //이런 에러가 뜬다
   @Get(':id')
+  // @UseInterceptors(ClassSerializerInterceptor)
   getPost(@Param('id', ParseIntPipe) id: number) {
     //param으로 받으면 string으로 넘어옴
     //+를 붙여주면 number 가 됨
