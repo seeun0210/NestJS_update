@@ -13,6 +13,8 @@ import { ChatsService } from './chats.service';
 import { EnterChatDto } from './dto/enter-chat.dto';
 import { CreateMessagesDto } from './messages/dto/create-messages.dto';
 import { ChatsMessagesService } from './messages/messages.service';
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { SocketCatchHttpExceptionFilter } from 'src/common/exception-filter/socket-catch-http.exception-filter';
 
 //socket.io가 연결하게되는 부분을 Gateway라고 부름
 @WebSocketGateway({
@@ -35,6 +37,20 @@ export class ChatsGateway implements OnGatewayConnection {
   }
 
   //채팅room 만들기
+  // validation Pipe가 글로벌로 여기에는 적용되지 않아서 따로 해줘야함
+  // 근데 class-validator의 경우 HTTP exception을 extends하고 있음
+  // 여기에서는 websocket Exception을 날려야 함
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
+  @UseFilters(SocketCatchHttpExceptionFilter)
   @SubscribeMessage('create_chat')
   async createChat(
     @MessageBody() data: CreateChatDto,
