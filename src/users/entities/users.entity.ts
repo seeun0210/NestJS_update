@@ -18,7 +18,7 @@ import {
 import { lengthValidationMessage } from 'src/common/validation-message/length-validation.message';
 import { stringValidationMessage } from 'src/common/validation-message/string-validation.message';
 import { emailValidationMessage } from 'src/common/validation-message/email-validation.message';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 /**
  * id: number
  *
@@ -50,6 +50,13 @@ export class UsersModel extends BaseModel {
   //1) 길이가 20을 넘지 않을 것
   //2) 유일무이한 값이 될 것
   nickname: string;
+
+  //이걸 노출하고 싶다면??
+  //이렇게 실제 존재하지 않는 프로퍼티를 노출시킬 수 있다.
+  @Expose()
+  get nicknameAndEmail() {
+    return this.nickname + '/' + this.email;
+  }
 
   @Column({
     unique: true,
