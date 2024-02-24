@@ -9,12 +9,20 @@ import { UsersModel } from './users/entities/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { PUBLIC_FOLDER_PATH } from './users/const/path.const';
 
 @Module({
   //다른 모듈을 불러올 때 사용하는 imports
   //cli를 사용하면 자동으로 생성해줌!
   imports: [
     PostsModule,
+    ServeStaticModule.forRoot({
+      //4022.jpg
+      //http://loacalhost:3000/public/posts/4022.jpg
+      rootPath: PUBLIC_FOLDER_PATH,
+      serveRoot: '/public',
+    }),
     TypeOrmModule.forRoot({
       // 데이터 베이스 타입
       type: 'postgres',
