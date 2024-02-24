@@ -38,12 +38,20 @@ export class ChatsGateway implements OnGatewayConnection {
 
   //socket.on('send_message',(message)=>{console.log(message)})
   @SubscribeMessage('send_message')
-  sendMessage(@MessageBody() message: { message: string; chatId: number }) {
+  sendMessage(
+    @MessageBody() message: { message: string; chatId: number },
+    @ConnectedSocket() socket: Socket,
+  ) {
     //클라이언트에서 sendMessage를 받자마자 서버에 연결된 모든 소켓들에게 receiveMessage 이벤트를 보냄
+    //사용자를 구분하지 않고 모두에게 보냄
+    // this.server
+    //   //들어간 방에만 메시지를 보낸다
+    //   .in(message.chatId.toString())
+    //   .emit('receive_message', message.message);
 
-    this.server
-      //들어간 방에만 메시지를 보낸다
-      .in(message.chatId.toString())
+    //나를 제외한 사람들에게 메시지 보내기
+    socket
+      .to(message.chatId.toString())
       .emit('receive_message', message.message);
   }
 }
