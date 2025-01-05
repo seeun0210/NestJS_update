@@ -6,6 +6,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/pagenate-post.dto';
 import { HOST, PORT, PROTOCOL } from 'src/common/const/env.const';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 //주입 할 수 있다.
@@ -15,6 +16,7 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
+    private readonly commonService:CommonService,
   ) { }
 
   async getAllPosts() {
@@ -23,22 +25,9 @@ export class PostsService {
 
   //1) 오름차순으로 정렬하는 pagination만 구현한다.
   async paginatePosts(dto: PaginatePostDto) {
-    /**
-     * data: Data[],
-     * total: number
-     */
-    const [posts, count] = await this.postsRepository.findAndCount({
-      order:{
-        createdAt:dto.order__createdAt
-      },
-      take:dto.take,
-      skip:dto.take*(dto.page-1)
-    })
-    
-    return {
-      data: posts,
-      total: count,
-    }
+    return this.commonService.paginate(dto,this.postsRepository,{
+      relations:['author'],
+    },'posts');
   }
 
   async pagePaginatePosts(dto: PaginatePostDto) {
@@ -52,10 +41,10 @@ export class PostsService {
   async cursorPaginatePosts(dto: PaginatePostDto) {
     const where: FindOptionsWhere<PostsModel> = {};
 
-    if (dto.where__id_more_than) {
-      where.id = MoreThan(dto.where__id_more_than);
-    } else if (dto.where__id_less_than) {
-      where.id = LessThan(dto.where__id_less_than);
+    if (dto.where__id__more_than) {
+      where.id = MoreThan(dto.where__id__more_than);
+    } else if (dto.where__id__less_than) {
+      where.id = LessThan(dto.where__id__less_than);
     }
 
     const posts = await this.postsRepository.find({
