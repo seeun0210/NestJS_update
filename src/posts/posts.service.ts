@@ -15,32 +15,59 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
-  ) {}
+  ) { }
 
   async getAllPosts() {
     return await this.postsRepository.find({ relations: ['author'] });
   }
 
   //1) 오름차순으로 정렬하는 pagination만 구현한다.
-  async paginatePosts(dto: PaginatePostDto){
-    const where:FindOptionsWhere<PostsModel>={};
+  async paginatePosts(dto: PaginatePostDto) {
+    /**
+     * data: Data[],
+     * total: number
+     */
+    const [posts, count] = await this.postsRepository.findAndCount({
+      order:{
+        createdAt:dto.order__createdAt
+      },
+      take:dto.take,
+      skip:dto.take*(dto.page-1)
+    })
+    
+    return {
+      data: posts,
+      total: count,
+    }
+  }
 
-    if(dto.where__id_more_than){
-      where.id=MoreThan(dto.where__id_more_than);
-    }else if(dto.where__id_less_than){
-      where.id=LessThan(dto.where__id_less_than);
+  async pagePaginatePosts(dto: PaginatePostDto) {
+    if (dto.page) {
+      return this.pagePaginatePosts(dto);
+    } else {
+      return this.cursorPaginatePosts(dto);
+    }
+  }
+
+  async cursorPaginatePosts(dto: PaginatePostDto) {
+    const where: FindOptionsWhere<PostsModel> = {};
+
+    if (dto.where__id_more_than) {
+      where.id = MoreThan(dto.where__id_more_than);
+    } else if (dto.where__id_less_than) {
+      where.id = LessThan(dto.where__id_less_than);
     }
 
-    const posts=await this.postsRepository.find({
-     where,
-     order:{
+    const posts = await this.postsRepository.find({
+      where,
+      order: {
         createdAt: dto.order__createdAt,
       },
       take: dto.take,
     });
-    const lastItem=posts.length>0&&posts.length===dto.take?posts[posts.length-1]:null;
-    const nextUrl= lastItem&&new URL(`${PROTOCOL}://${HOST}:${PORT}/posts`);
-    if(nextUrl){
+    const lastItem = posts.length > 0 && posts.length === dto.take ? posts[posts.length - 1] : null;
+    const nextUrl = lastItem && new URL(`${PROTOCOL}://${HOST}:${PORT}/posts`);
+    if (nextUrl) {
       /**
        * dto의 키값들을 루핑하면서 
        * 키값에 해당되는 밸류가 존재하ㅕㄴ 
@@ -49,48 +76,48 @@ export class PostsService {
        * 단, where__id_more_than 값만 lastItem의 마자믹 값으로 넣어준다
        * 
        */
-      for (const key of Object.keys(dto)){
-        if(dto[key]){
-          if(key !=='where__id_more_than'&& key !=='where__id_less_than'){
+      for (const key of Object.keys(dto)) {
+        if (dto[key]) {
+          if (key !== 'where__id_more_than' && key !== 'where__id_less_than') {
             nextUrl.searchParams.append(key, dto[key]);
           }
         }
       }
 
-      let key =null;
+      let key = null;
 
-      if(dto.order__createdAt==='ASC'){
-        key='where__id_more_than';
-      }else{
-        key='where__id_less_than';
+      if (dto.order__createdAt === 'ASC') {
+        key = 'where__id_more_than';
+      } else {
+        key = 'where__id_less_than';
       }
 
-      nextUrl.searchParams.append(key,lastItem.id.toString());
+      nextUrl.searchParams.append(key, lastItem.id.toString());
     }
-     /**
-   * 
-   * Response:
-   * {
-   *  data: Data[]
-   *  cursor:{
-   *    after: number,
-   *  },
-   *  count: 응답한 데이터의 갯수,
-   *  next: 다음 요청을 할 때 사용할 URL
-   * }
-   */
-  return {
-    data: posts,
-    cursor: {
-      after: lastItem?.id??null,
-    },
-    count: posts.length,
-    next: nextUrl?.toString(),
-  }
+    /**
+  * 
+  * Response:
+  * {
+  *  data: Data[]
+  *  cursor:{
+  *    after: number,
+  *  },
+  *  count: 응답한 데이터의 갯수,
+  *  next: 다음 요청을 할 때 사용할 URL
+  * }
+  */
+    return {
+      data: posts,
+      cursor: {
+        after: lastItem?.id ?? null,
+      },
+      count: posts.length,
+      next: nextUrl?.toString(),
+    }
   }
 
-  async generatePosts(userId:number){
-    for(let i=0; i<100; i++){
+  async generatePosts(userId: number) {
+    for (let i = 0; i < 100; i++) {
       await this.createPost(userId, {
         title: `임의로 생성된 post ${i}`,
         content: `임의로 생성된 post ${i}`,
