@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersModel } from 'src/users/entities/users.entity';
+import { UsersModel } from 'src/users/entity/users.entity';
 import { HASH_ROUNDS, JWT_SECRET } from './const/auth.const';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';

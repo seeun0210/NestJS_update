@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -18,11 +19,12 @@ import {
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
 import { User } from 'src/users/decorator/user.decorator';
-import { UsersModel } from 'src/users/entities/users.entity';
+import { UsersModel } from 'src/users/entity/users.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
+import { PaginatePostDto } from './dto/pagenate-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -31,12 +33,17 @@ export class PostsController {
   // 1) GET /posts
   // 모든 post를 다 가져온다
   @Get()
-  @UseInterceptors(LogInterceptor)
-  // @UseInterceptors(ClassSerializerInterceptor)
-  getPosts() {
-    return this.postsService.getAllPosts();
+  getPosts(@Query() query:PaginatePostDto){
+    return this.postsService.paginatePosts(query);
   }
 
+  // POST /posts/random
+  @Post('random')
+  @UseGuards(AccessTokenGuard)
+  async generatePosts(@User() user:UsersModel){
+    await this.postsService.generatePosts(user.id);
+    return true;
+  }
   // 2) GET /posts/:id
   // id에 해당되는 post를 가져온다
   // 그런데 파라미터는 무조건 string이다(url에서 추출해오기 때문)
