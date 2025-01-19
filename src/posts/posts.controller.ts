@@ -16,15 +16,17 @@ import { User } from 'src/users/decorator/user.decorator';
 import { UsersModel } from 'src/users/entity/users.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PaginatePostDto } from './dto/pagenate-post.dto';
+import { PaginatePostDto } from './dto/paginate-post.dto';
 import { ImageModelType } from 'src/common/entity/image.entity';
 import { DataSource } from 'typeorm';
+import { PostImageService } from './image/image.service';
 
 @Controller('posts')
 export class PostsController {
 	constructor(
 		private readonly postsService: PostsService,
 		private readonly dataSource: DataSource,
+		private readonly postImageService: PostImageService,
 	) {}
 
 	// 1) GET /posts
@@ -100,10 +102,11 @@ export class PostsController {
 			const post = await this.postsService.createPost(
 				userId,
 				body,
+				qr,
 			);
 
 			for (let i = 0; i < body.images.length; i++) {
-				await this.postsService.createPostImage({
+				await this.postImageService.createPostImage({
 					post,
 					order: i,
 					path: body.images[i],

@@ -10,20 +10,13 @@ import { PostsModel } from './entity/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PaginatePostDto } from './dto/pagenate-post.dto';
+import { PaginatePostDto } from './dto/paginate-post.dto';
 import {
 	HOST,
 	PORT,
 	PROTOCOL,
 } from 'src/common/const/env.const';
 import { CommonService } from 'src/common/common.service';
-import {
-	POST_IMAGE_PATH,
-	TEMP_FOLDER_PATH,
-} from 'src/common/const/path.const';
-import { basename, join } from 'path';
-import { promises } from 'fs';
-import { CreatePostImageDto } from './image/dto/create-image.dto';
 import { ImageModel } from 'src/common/entity/image.entity';
 import { DEFAULT_POST_FIND_OPTIONS } from './const/default-post-find-options.const';
 
@@ -179,7 +172,7 @@ export class PostsService {
 		const repository = this.getRepository(qr);
 		//1) create -> 저장할 객체를 생성한다.
 		//2) save -> 객체를 저장한다. (create 메서드에서 생성한 객체로)
-		const post = this.postsRepository.create({
+		const post = repository.create({
 			author: {
 				//연동할 author의 정보를 넣어준다
 				id: authorId,
@@ -189,40 +182,9 @@ export class PostsService {
 			likeCount: 0,
 			commentCount: 0,
 		});
-		const newPost = await this.postsRepository.save(post);
+		const newPost = await repository.save(post);
 
 		return newPost;
-	}
-
-	async createPostImage(dto: CreatePostImageDto) {
-		//dto의 이미지 이름을 기반으로
-		//파일의 경로를 생성한다.
-		const tempFilePath = join(TEMP_FOLDER_PATH, dto.path);
-
-		try {
-			//access: 해당 경로의 파일에 접근이 가능한지 알려줌
-			promises.access(tempFilePath);
-		} catch (e) {
-			throw new BadRequestException(
-				'존재하지 않는 파일 입니다.',
-			);
-		}
-
-		//basename: 파일 이름만 추출
-		const fileName = basename(tempFilePath);
-
-		//새로 이동할 포스트 폴더의 경로 + 이미지 이름
-		const newPath = join(POST_IMAGE_PATH, fileName);
-
-		//save
-		const result = await this.imageRepository.save({
-			...dto,
-		});
-
-		//파일 옮기기
-		await promises.rename(tempFilePath, newPath);
-
-		return result;
 	}
 
 	async updatePost(postId: number, postDto: UpdatePostDto) {
