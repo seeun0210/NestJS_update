@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm';
 import { PostsModel } from './entity/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,9 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/pagenate-post.dto';
 import { HOST, PORT, PROTOCOL } from 'src/common/const/env.const';
 import { CommonService } from 'src/common/common.service';
+import { POST_IMAGE_PATH, PUBLIC_FOLDER_PATH, TEMP_FOLDER_PATH } from 'src/common/const/path.const';
+import { basename, join } from 'path';
+import { promises } from 'fs';
 
 @Injectable()
 //주입 할 수 있다.
@@ -16,7 +19,7 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
-    private readonly commonService:CommonService,
+    private readonly commonService: CommonService,
   ) { }
 
   async getAllPosts() {
@@ -25,9 +28,9 @@ export class PostsService {
 
   //1) 오름차순으로 정렬하는 pagination만 구현한다.
   async paginatePosts(dto: PaginatePostDto) {
-    return this.commonService.paginate(dto,this.postsRepository,{
-      relations:['author'],
-    },'posts');
+    return this.commonService.paginate(dto, this.postsRepository, {
+      relations: ['author'],
+    }, 'posts');
   }
 
   async pagePaginatePosts(dto: PaginatePostDto) {
@@ -125,7 +128,7 @@ export class PostsService {
     return post;
   }
 
-  async createPost(authorId: number, postDto: CreatePostDto, image?: string) {
+  async createPost(authorId: number, postDto: CreatePostDto) {
     //1) create -> 저장할 객체를 생성한다.
     //2) save -> 객체를 저장한다. (create 메서드에서 생성한 객체로)
     const post = this.postsRepository.create({
@@ -134,13 +137,42 @@ export class PostsService {
         id: authorId,
       },
       ...postDto,
-      image,
       likeCount: 0,
       commentCount: 0,
     });
     const newPost = await this.postsRepository.save(post);
 
     return newPost;
+  }
+
+  async createPostImage(dto: CreatePostDto) {
+    //dto의 이미지 이름을 기반으로 
+    //파일의 경로를 생성한다.
+    const tempFilePath = join(
+      TEMP_FOLDER_PATH,
+      dto.image
+    )
+
+    try {
+      //access: 해당 경로의 파일에 접근이 가능한지 알려줌
+      promises.access(tempFilePath)
+    } catch (e) {
+      throw new BadRequestException('존재하지 않는 파일 입니다.')
+    }
+
+    //basename: 파일 이름만 추출
+    const fileName = basename(tempFilePath)
+
+    //새로 이동할 포스트 폴더의 경로 + 이미지 이름
+    const newPath = join(
+      POST_IMAGE_PATH,
+      fileName
+    )
+
+    //파일 옮기기
+    await promises.rename(tempFilePath, newPath)
+
+    return true;
   }
 
   async updatePost(postId: number, postDto: UpdatePostDto) {

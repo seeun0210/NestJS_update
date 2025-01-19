@@ -1,10 +1,5 @@
 import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import {
-  MaxLengthPipe,
-  MinLengthPipe,
-  PasswordPipe,
-} from './pipe/password.pipe';
 import { BasicTokenGuard } from './guard/basic-token.guard';
 import {
   AccessTokenGuard,

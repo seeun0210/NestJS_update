@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty    } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional    } from 'class-validator';
 import { PostsModel } from '../entity/posts.entity';
 import { PickType } from '@nestjs/mapped-types';
 
@@ -7,11 +7,7 @@ import { PickType } from '@nestjs/mapped-types';
 
 export class CreatePostDto extends PickType(PostsModel, ['title', 'content']) {
   @IsString()
-  @IsNotEmpty()
-  title: string;
-
-  @IsString()
-  @IsNotEmpty()
-  content: string;
+  @IsOptional()
+  image?:string;
 }
 //postsModel에서 title과 content만 상속받음

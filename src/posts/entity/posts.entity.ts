@@ -15,6 +15,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CommentsModel } from '../comments/entity/comments.entity';
+import { ImageModel } from 'src/common/entity/image.entity';
 
 @Entity()
 export class PostsModel extends BaseModel {
@@ -64,4 +65,8 @@ export class PostsModel extends BaseModel {
 
   @OneToMany(() => CommentsModel, (comment) => comment.post)
   comments: CommentsModel[];
+
+  @OneToMany((type)=>ImageModel,(image)=>image.post)
+  images:ImageModel[]
+
 }

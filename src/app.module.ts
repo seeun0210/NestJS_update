@@ -23,6 +23,7 @@ import { ChatsModel } from './chats/entity/chats.entity';
 import { MessagesModel } from './chats/messages/entity/messages.entity';
 import { CommentsModule } from './posts/comments/comments.module';
 import { CommentsModel } from './posts/comments/entity/comments.entity';
+import { ImageModel } from './common/entity/image.entity';
 
 @Module({
   //다른 모듈을 불러올 때 사용하는 imports
@@ -43,7 +44,7 @@ import { CommentsModel } from './posts/comments/entity/comments.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [PostsModel, UsersModel, ChatsModel, MessagesModel, CommentsModel],
+      entities: [PostsModel, UsersModel, ChatsModel, MessagesModel, CommentsModel,ImageModel],
       //개발환경에서는 true
       //production한경에서는 false
       synchronize: true,
