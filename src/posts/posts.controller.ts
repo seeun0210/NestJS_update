@@ -19,9 +19,11 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { ImageModelType } from 'src/common/entity/image.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryRunner as QR } from 'typeorm';
 import { PostImageService } from './image/image.service';
 import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
+import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
+import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -73,12 +75,14 @@ export class PostsController {
 	//DTO-Data Transfer Object(데이터 전송 객체)
 	@Post()
 	@UseGuards(AccessTokenGuard)
+	@UseInterceptors(TransactionInterceptor)
 	//포스트맨 또는 클라이언트에서 실제로 이미지를 업로드할 때, 이미지라는 키값에 파일을 넣어서 보내면 된다
 	async postPosts(
 		//User 커스텀데코레이터로 user정보가져오기
 		//파라미터로 UsersModel의 키값을 가져올 수 있게 해놓음
 		@User('id') userId: number,
 		@Body() body: CreatePostDto,
+		@QueryRunner() qr: QR,
 		// @Body('title') title: string,
 		// @Body('content') content: string,
 		//DefaultValuePipe의 경우 new로 인스턴스화를 해줌
@@ -91,42 +95,42 @@ export class PostsController {
 	) {
 		//트랜잭션과 관련된 모든 쿼리 러너를 담당함
 		//쿼리 러너를 생성한다.
-		const qr = this.dataSource.createQueryRunner();
+		// const qr = this.dataSource.createQueryRunner();
 
 		//쿼리 러너에 연결한다.
-		await qr.connect();
+		// await qr.connect();
 		//쿼리 러너에서 트랜잭션을 시작한다.
 		//이 시점부터 같은 쿼리 러너를 사용하면
 		//트랜잭션 안에서 데이터베이스 액션을 실행할 수 있다.
-		await qr.startTransaction();
+		// await qr.startTransaction();
 
 		//로직 실행
-		try {
-			const post = await this.postsService.createPost(
-				userId,
-				body,
-				qr,
-			);
+		// try {
+		const post = await this.postsService.createPost(
+			userId,
+			body,
+			qr,
+		);
 
-			for (let i = 0; i < body.images.length; i++) {
-				await this.postImageService.createPostImage({
-					post,
-					order: i,
-					path: body.images[i],
-					type: ImageModelType.POST_IMAGE,
-				});
-			}
-
-			await qr.commitTransaction();
-			await qr.release();
-
-			return this.postsService.getPostById(post.id);
-		} catch (e) {
-			//어떤 에러든 에러가 던져지면
-			//트랜 잭션을 종료하고 원래 상태로 되돌린다.
-			await qr.rollbackTransaction();
-			await qr.release();
+		for (let i = 0; i < body.images.length; i++) {
+			await this.postImageService.createPostImage({
+				post,
+				order: i,
+				path: body.images[i],
+				type: ImageModelType.POST_IMAGE,
+			});
 		}
+
+		// 	await qr.commitTransaction();
+		// 	await qr.release();
+
+		// 	return this.postsService.getPostById(post.id);
+		// } catch (e) {
+		//어떤 에러든 에러가 던져지면
+		//트랜 잭션을 종료하고 원래 상태로 되돌린다.
+		// 	await qr.rollbackTransaction();
+		// 	await qr.release();
+		// }
 	}
 
 	// 4)PUT /posts/:id
