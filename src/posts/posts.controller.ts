@@ -1,20 +1,14 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
-  Put,
   Query,
-  Request,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
@@ -22,28 +16,28 @@ import { User } from 'src/users/decorator/user.decorator';
 import { UsersModel } from 'src/users/entity/users.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
 import { PaginatePostDto } from './dto/pagenate-post.dto';
+import { ImageModelType } from 'src/common/entity/image.entity';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   // 1) GET /posts
   // 모든 post를 다 가져온다
   @Get()
-  getPosts(@Query() query:PaginatePostDto){
+  getPosts(@Query() query: PaginatePostDto) {
     return this.postsService.paginatePosts(query);
   }
 
   // POST /posts/random
   @Post('random')
   @UseGuards(AccessTokenGuard)
-  async generatePosts(@User() user:UsersModel){
+  async generatePosts(@User() user: UsersModel) {
     await this.postsService.generatePosts(user.id);
     return true;
   }
+
   // 2) GET /posts/:id
   // id에 해당되는 post를 가져온다
   // 그런데 파라미터는 무조건 string이다(url에서 추출해오기 때문)
@@ -63,6 +57,7 @@ export class PostsController {
     //+를 붙여주면 number 가 됨
     return this.postsService.getPostById(id);
   }
+
   // 3)POST /posts
   // post를 생성한다
   //
@@ -85,11 +80,21 @@ export class PostsController {
     //nestJs에서 dependency injection을 해주냐 안해주냐의 차이!
     // @Body('isPublic', new DefaultValuePipe(true)) isPublic: boolean,
   ) {
+    const post = await this.postsService.createPost(userId, body)
 
-    await this.postsService.createPostImage(body);
-    // const authorId = user.id;
-    return this.postsService.createPost(userId, body);
+    for (let i = 0; i < body.images.length; i++) {
+      await this.postsService.createPostImage({
+        post,
+        order: i,
+        path: body.images[i],
+        type: ImageModelType.POST_IMAGE
+      });
+    }
+
+    return this.postsService.getPostById(post.id)
+
   }
+
   // 4)PUT /posts/:id
   // id에 해당하는 POST를 변경한다.
   @Patch(':id')
@@ -101,6 +106,7 @@ export class PostsController {
   ) {
     return this.postsService.updatePost(id, body);
   }
+
   // 5) DELETE /posts/:id
   // id에 해당되는 POST를 삭제한다.
   @Delete(':id')

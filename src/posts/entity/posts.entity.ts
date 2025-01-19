@@ -67,6 +67,5 @@ export class PostsModel extends BaseModel {
   comments: CommentsModel[];
 
   @OneToMany((type)=>ImageModel,(image)=>image.post)
-  images:ImageModel[]
-
+  images:ImageModel[];
 }

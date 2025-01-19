@@ -10,6 +10,9 @@ import { CommonService } from 'src/common/common.service';
 import { POST_IMAGE_PATH, PUBLIC_FOLDER_PATH, TEMP_FOLDER_PATH } from 'src/common/const/path.const';
 import { basename, join } from 'path';
 import { promises } from 'fs';
+import { CreatePostImageDto } from './image/dto/create-image.dto';
+import { ImageModel } from 'src/common/entity/image.entity';
+import { DEFAULT_POST_FIND_OPTIONS } from './const/default-post-find-options.const';
 
 @Injectable()
 //주입 할 수 있다.
@@ -19,17 +22,19 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
+    @InjectRepository(ImageModel)
+    private readonly imageRepository: Repository<ImageModel>,
     private readonly commonService: CommonService,
   ) { }
 
   async getAllPosts() {
-    return await this.postsRepository.find({ relations: ['author'] });
+    return await this.postsRepository.find({ ...DEFAULT_POST_FIND_OPTIONS });
   }
 
   //1) 오름차순으로 정렬하는 pagination만 구현한다.
   async paginatePosts(dto: PaginatePostDto) {
     return this.commonService.paginate(dto, this.postsRepository, {
-      relations: ['author'],
+      ...DEFAULT_POST_FIND_OPTIONS,
     }, 'posts');
   }
 
@@ -113,14 +118,15 @@ export class PostsService {
       await this.createPost(userId, {
         title: `임의로 생성된 post ${i}`,
         content: `임의로 생성된 post ${i}`,
+        images: [],
       });
     }
   }
 
   async getPostById(id: number) {
     const post = await this.postsRepository.findOne({
+      ...DEFAULT_POST_FIND_OPTIONS,
       where: { id },
-      relations: ['author'],
     });
     if (!post) {
       throw new NotFoundException();
@@ -137,6 +143,7 @@ export class PostsService {
         id: authorId,
       },
       ...postDto,
+      images:[],
       likeCount: 0,
       commentCount: 0,
     });
@@ -145,12 +152,12 @@ export class PostsService {
     return newPost;
   }
 
-  async createPostImage(dto: CreatePostDto) {
+  async createPostImage(dto: CreatePostImageDto) {
     //dto의 이미지 이름을 기반으로 
     //파일의 경로를 생성한다.
     const tempFilePath = join(
       TEMP_FOLDER_PATH,
-      dto.image
+      dto.path
     )
 
     try {
@@ -168,11 +175,14 @@ export class PostsService {
       POST_IMAGE_PATH,
       fileName
     )
+    
+    //save
+    const result = await this.imageRepository.save({...dto})
 
     //파일 옮기기
     await promises.rename(tempFilePath, newPath)
 
-    return true;
+    return result;
   }
 
   async updatePost(postId: number, postDto: UpdatePostDto) {
