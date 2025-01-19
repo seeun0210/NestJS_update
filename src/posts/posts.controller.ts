@@ -1,14 +1,15 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
+	ParseIntPipe,
+	Patch,
+	Post,
+	Query,
+	UseGuards,
+	UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard';
@@ -20,6 +21,7 @@ import { PaginatePostDto } from './dto/paginate-post.dto';
 import { ImageModelType } from 'src/common/entity/image.entity';
 import { DataSource } from 'typeorm';
 import { PostImageService } from './image/image.service';
+import { LogInterceptor } from 'src/common/interceptor/log.interceptor';
 
 @Controller('posts')
 export class PostsController {
@@ -32,6 +34,7 @@ export class PostsController {
 	// 1) GET /posts
 	// 모든 post를 다 가져온다
 	@Get()
+	@UseInterceptors(LogInterceptor)
 	getPosts(@Query() query: PaginatePostDto) {
 		return this.postsService.paginatePosts(query);
 	}
